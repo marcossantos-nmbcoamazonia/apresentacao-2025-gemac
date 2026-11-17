@@ -66,11 +66,15 @@ com valor em qualquer indicador numérico (em 2025, Dez).
 zero. Em 2025: impressões e cliques sem dado em Jan, Mar, Abr e Mai; OOH em
 Jan, Fev e Mar; mídia em Jan e Mar.
 
-**Indicador vazio some, não vira zero.** Em 2025 a planilha não tem leads
-(PUB-01), fluxo aeroportuário (PUB-05) nem produção (PUB-08). Os slides os
-escondem — sem CPL, sem "0 leads", sem "Produção R$ 0 · 0%" — e voltam
-sozinhos se as linhas forem preenchidas. Para o CPL voltar também é preciso
-listar as campanhas de lead de 2025 em `src/data/campanhasLead.ts`.
+**Indicador vazio some, não vira zero.** Em 2025 a planilha não tem fluxo
+aeroportuário (PUB-05) nem produção (PUB-08). Os slides os escondem — sem
+"Produção R$ 0 · 0%" — e voltam sozinhos se as linhas forem preenchidas.
+
+**Leads (PUB-01) só têm Jun (2.167) e Dez (74)**, total 2.241. O CPL fica
+oculto até as campanhas de lead de 2025 (Capital de Giro e Custeio Agrícola,
+conforme a ressalva da planilha) serem listadas com o valor do PI em
+`src/data/campanhasLead.ts`. Dividir a mídia inteira pelos leads daria um
+custo inflado, porque a maior parte da verba não tem meta de lead.
 
 **A variação é mês contra mês**, sempre rotulada com os meses comparados
 (`Ago vs. Jul`), para não ser lida como variação do acumulado.
@@ -82,7 +86,7 @@ src/
   api/client.ts          fetch + cache de sessão (5 min) com fallback para cache vencido
   api/parseSheet.ts      parser genérico das abas de área — serve as 7 abas
   data/publicidade.ts    regra de negócio da seção (funções puras) + nome da aba
-  data/campanhasLead.ts  campanhas de lead (base do CPL) — vazia em 2025
+  data/campanhasLead.ts  campanhas de lead (base do CPL) — falta preencher 2025
   data/usePublicidade.ts casca React sobre a anterior
   data/resolveClosedMonth.ts   a automação do mês fechado
   lib/numbers.ts         pt-BR: parse, formato compacto (317 Mi, 867 Mil), variação

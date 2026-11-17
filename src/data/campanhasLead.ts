@@ -17,11 +17,11 @@
  *
  * 2025
  *
- * A aba "01 PUBLICIDADE - 2025" não tem leads (PUB-01 vazio em todos os
- * meses), então não há CPL a calcular e a lista fica vazia. Os PIs que estavam
- * aqui (2026/15, 2026/16 e 2026/18) são campanhas de 2026 e não podem entrar
- * na conta de 2025. Com a lista vazia o slide de eficiência esconde o CPL e o
- * bloco de campanhas sozinho.
+ * A aba "01 PUBLICIDADE - 2025" tem leads só em Jun (2.167) e Dez (74). As
+ * campanhas de lead de 2025 ainda não foram conferidas contra os PIs, então a
+ * lista está vazia e o slide de eficiência esconde o CPL e o bloco de
+ * campanhas sozinho. Os PIs que estavam aqui (2026/15, 2026/16 e 2026/18) são
+ * campanhas de 2026 e não podem entrar na conta de 2025.
  *
  * COMO ATUALIZAR
  *

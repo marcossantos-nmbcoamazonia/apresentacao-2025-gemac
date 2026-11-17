@@ -211,8 +211,12 @@ export function Eficiencia({ dados }: { dados: DadosPublicidade | null }) {
           <>
             O CPM divide toda a mídia executada{' '}
             {a ? `(${formatCompact(a.series.midia.total, { moeda: true })})` : ''}, inclusive OOH e
-            off-line, pelas impressões digitais. Sem leads na planilha de {dados?.fechado.ano}, não
-            há custo por lead.
+            off-line, pelas impressões digitais.
+            {/* Com leads mas sem a lista de campanhas de lead conferida, o CPL
+                fica de fora sem comentário no slide — o aviso vai para o
+                `npm run conferir`, não para a diretoria. */}
+            {!a.series.leads.temDado &&
+              ` Sem leads na planilha de ${dados?.fechado.ano}, não há custo por lead.`}
           </>
         )}
       </Nota>
