@@ -1,7 +1,8 @@
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { Deck } from './deck/Deck'
 import type { FonteSlide, SlideDef } from './deck/types'
 import { usePublicidade } from './data/usePublicidade'
+import { useInfluencia } from './data/useInfluencia'
 import { ABA_PUBLICIDADE } from './data/publicidade'
 import { ContextoErro } from './slides/editorial'
 import { Capa } from './slides/Capa'
@@ -14,9 +15,11 @@ import { Investimento } from './slides/Investimento'
 import { Produtos } from './slides/Produtos'
 import { Pracas } from './slides/Pracas'
 import { Fechamento } from './slides/Fechamento'
+import { Influencia } from './slides/Influencia'
 
 export default function App() {
   const { dados, carregando, erro, buscadoEm, recarregar } = usePublicidade()
+  const influencia = useInfluencia()
 
   const fonte: FonteSlide = {
     estado: erro ? 'erro' : carregando ? 'carregando' : 'ok',
@@ -24,6 +27,20 @@ export default function App() {
     buscadoEm,
     aba: ABA_PUBLICIDADE,
   }
+
+  // outra planilha, outro ritmo: o consolidado de influência fecha no seu mês
+  const fonteInfluencia: FonteSlide = {
+    estado: influencia.erro ? 'erro' : influencia.carregando ? 'carregando' : 'ok',
+    mes: influencia.dados?.curto ?? null,
+    buscadoEm: influencia.buscadoEm,
+    aba: 'base (Marketing de Influência)',
+  }
+
+  const recarregarInfluencia = influencia.recarregar
+  const recarregarTudo = useCallback(() => {
+    recarregar()
+    recarregarInfluencia()
+  }, [recarregar, recarregarInfluencia])
 
   const periodo = dados?.fechado.periodo ?? null
 
@@ -74,8 +91,18 @@ export default function App() {
         fonte,
         render: () => <Fechamento dados={dados} />,
       },
+      {
+        id: 'influencia',
+        titulo: 'Marketing de influência',
+        fonte: fonteInfluencia,
+        render: () => (
+          <ContextoErro.Provider value={influencia.erro}>
+            <Influencia dados={influencia.dados} />
+          </ContextoErro.Provider>
+        ),
+      },
     ],
-    [dados, carregando, periodo, fonte],
+    [dados, carregando, periodo, fonte, fonteInfluencia, influencia.dados, influencia.erro],
   )
 
   return (
@@ -86,7 +113,7 @@ export default function App() {
           periodo ? ` - ${periodo.replace(/\s*–\s*/, '-')}` : ''
         }`}
         status={fonte}
-        aoRecarregar={recarregar}
+        aoRecarregar={recarregarTudo}
       />
     </ContextoErro.Provider>
   )

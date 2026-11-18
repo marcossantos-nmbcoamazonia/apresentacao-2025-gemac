@@ -79,6 +79,22 @@ custo inflado, porque a maior parte da verba não tem meta de lead.
 **A variação é mês contra mês**, sempre rotulada com os meses comparados
 (`Ago vs. Jul`), para não ser lida como variação do acumulado.
 
+## Marketing de influência (lâmina 11)
+
+Vem de outra planilha (`16qaRdOT…`, aba `base`, constante `PLANILHA_INFLUENCIA`
+em `src/data/influencia.ts`): o quadro "Big Numbers" da estratégia Always On,
+Out – Dez 2025. Segue o mesmo desenho da lâmina de 2026, com duas diferenças
+que vêm da planilha:
+
+- os meses chegam sem ano ("OUT"), então o ano sai de `ANO_PADRAO` (2025);
+- não há os top 5 por views. No lugar, o bloco "Campanhas do mês" vira o top 5
+  de campanhas por nº de conteúdos e a coluna "campanhas mês a mês".
+
+Totais (influenciadores, engajamento) vêm da coluna TOTAL, nunca da soma dos
+meses: influenciadores são únicos no período e engajamento é taxa. O
+`npm run conferir` confere as somas internas da planilha, inclusive se as
+campanhas de cada mês fecham o total de conteúdos do mês.
+
 ## Estrutura
 
 ```
@@ -86,6 +102,7 @@ src/
   api/client.ts          fetch + cache de sessão (5 min) com fallback para cache vencido
   api/parseSheet.ts      parser genérico das abas de área — serve as 7 abas
   data/publicidade.ts    regra de negócio da seção (funções puras) + nome da aba
+  data/influencia.ts     parser do consolidado de influência (formatos 2025 e 2026)
   data/campanhasLead.ts  campanhas de lead (base do CPL) — falta preencher 2025
   data/usePublicidade.ts casca React sobre a anterior
   data/resolveClosedMonth.ts   a automação do mês fechado

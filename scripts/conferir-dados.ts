@@ -11,6 +11,12 @@
  */
 import { parseAba, porId } from '../src/api/parseSheet'
 import { parseBR } from '../src/lib/numbers'
+import {
+  ABA_INFLUENCIA,
+  PLANILHA_INFLUENCIA,
+  parseInfluencia,
+  type MetricaInfluencia,
+} from '../src/data/influencia'
 import { ABA_PUBLICIDADE, montarPublicidade } from '../src/data/publicidade'
 import type { Kpi } from '../src/data/kpis'
 import type { SerieMensal } from '../src/data/publicidadeAnalise'
@@ -170,3 +176,89 @@ if (a.leadDesatualizado) {
       `  Confira os PIs do período e atualize src/data/campanhasLead.ts (inclusive CONFERIDO_ATE).`,
   )
 }
+
+// ------------------------- marketing de influência --------------------------
+const rInf = await fetch(
+  `${BASE}/google/sheets/${PLANILHA_INFLUENCIA}/data?range=${encodeURIComponent(ABA_INFLUENCIA)}`,
+)
+if (!rInf.ok) throw new Error(`API respondeu ${rInf.status} para "${ABA_INFLUENCIA}"`)
+const jInf = (await rInf.json()) as { success: boolean; data?: { values?: string[][] } }
+if (!jInf.success || !jInf.data?.values) throw new Error('Consolidado de influência sem dados')
+const inf = parseInfluencia(jInf.data.values)
+const cabMeses = inf.meses.map((m) => m.nome).join('   ')
+
+console.log(`
+
+MARKETING DE INFLUÊNCIA   (planilha ${PLANILHA_INFLUENCIA.slice(0, 8)}…, aba "${ABA_INFLUENCIA}")`)
+console.log(`PERÍODO ........... ${inf.periodo}   (pílula: dados até ${inf.curto})`)
+console.log(REGUA)
+
+const fmtM = (v: number | null) => (v == null ? '—' : br(v, Number.isInteger(v) ? 0 : 2))
+const linhaInf = (rotulo: string, m: MetricaInfluencia) =>
+  console.log(
+    `  ${rotulo.padEnd(26)}${m.meses.map((v) => fmtM(v).padStart(12)).join('')}${fmtM(m.total).padStart(14)}`,
+  )
+console.log(`  ${''.padEnd(26)}${inf.meses.map((m) => m.nome.padStart(12)).join('')}${'TOTAL'.padStart(14)}`)
+linhaInf('Conteúdos', inf.conteudos)
+linhaInf('  Stories', inf.stories)
+linhaInf('  Reels', inf.reels)
+linhaInf('  Outros', inf.outros)
+linhaInf('Views totais', inf.views)
+linhaInf('Alcance orgânico', inf.alcance)
+linhaInf('Interações', inf.interacoes)
+linhaInf('Influenciadores', inf.influenciadores)
+linhaInf('Engaj. orgânico (%)', inf.engajamento)
+
+if (inf.campanhasNoPeriodo.length) {
+  console.log(`\n  Campanhas no período (nº de conteúdos)`)
+  for (const c of inf.campanhasNoPeriodo) {
+    console.log(`    ${c.nome.padEnd(26)}${fmtM(c.conteudos).padStart(8)}  ${br(c.participacao ?? 0, 1).padStart(5)}%`)
+  }
+}
+
+// a planilha é calculada por fórmula; se alguém sobrescrever uma célula,
+// as somas internas deixam de fechar e aparece aqui
+const avisos: string[] = []
+const soma = (...xs: (number | null)[]) => xs.reduce<number>((acc, b) => acc + (b ?? 0), 0)
+const confere = (rotulo: string, esperado: number, obtido: number | null) => {
+  if (obtido == null || Math.abs(esperado - obtido) > 0.5) {
+    avisos.push(`${rotulo}: esperado ${br(esperado)}, planilha traz ${fmtM(obtido)}`)
+  }
+}
+const colunas = [...inf.meses.map((m, i) => ({ rotulo: m.nome, i })), { rotulo: 'TOTAL', i: -1 }]
+const em = (m: MetricaInfluencia, i: number) => (i < 0 ? m.total : m.meses[i])
+for (const { rotulo, i } of colunas) {
+  confere(
+    `Interações ${rotulo} = curtidas + comentários + compartilhados + salvos`,
+    soma(em(inf.curtidas, i), em(inf.comentarios, i), em(inf.compartilhados, i), em(inf.salvos, i)),
+    em(inf.interacoes, i),
+  )
+  confere(
+    `Conteúdos ${rotulo} = Stories + Reels + outros`,
+    soma(em(inf.stories, i), em(inf.reels, i), em(inf.outros, i)),
+    em(inf.conteudos, i),
+  )
+}
+for (const [rotulo, m] of [
+  ['Conteúdos', inf.conteudos],
+  ['Views', inf.views],
+  ['Alcance orgânico', inf.alcance],
+  ['Interações', inf.interacoes],
+] as const) {
+  confere(`${rotulo}: TOTAL = soma dos meses`, soma(...m.meses), m.total)
+}
+// 2025: a lista de campanhas do mês tem que somar o total de conteúdos do mês
+inf.campanhasPorMes.forEach((lista, i) => {
+  if (!lista.length) return
+  confere(
+    `Campanhas de ${inf.meses[i].nome} somam os conteúdos do mês`,
+    soma(...lista.map((c) => c.conteudos)),
+    inf.conteudos.meses[i],
+  )
+})
+console.log(
+  avisos.length
+    ? `\n  ATENÇÃO — somas que não fecham:\n${avisos.map((x) => `    · ${x}`).join('\n')}`
+    : `\n  Somas internas conferem (${cabMeses} e TOTAL).`,
+)
+console.log('')
