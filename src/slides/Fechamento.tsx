@@ -15,7 +15,7 @@ export function Fechamento({ dados }: { dados: DadosPublicidade | null }) {
         { valor: formatCompact(a.alcanceTotal), rotulo: 'impactos entregues' },
         {
           valor: formatCompact(a.investimentoTotal, { moeda: true }),
-          rotulo: a.series.producao.temDado
+          rotulo: a.producaoTotal != null
             ? 'investidos em mídia e produção'
             : 'investidos em mídia',
         },

@@ -8,7 +8,7 @@
  * não há rota da API para ela, então os valores estão transcritos aqui. Total
  * geral da tabela: R$ 32.894.354,89 — conferido por `npm run conferir`.
  *
- * TRÊS REGRAS
+ * QUATRO REGRAS
  *
  * 1. **Redes sociais entram em Internet.** A tabela traz as duas linhas
  *    separadas (redes com R$ 0,00); o investimento é somado em Internet.
@@ -18,7 +18,16 @@
  * 3. **Cada meio tem a sua unidade de entrega** — inserções, impressões,
  *    impactos, publicações. Somar entregas de meios diferentes não faz sentido,
  *    por isso não há "total de entrega" (o "494 Mi" da tabela mistura tudo).
+ * 4. **O total bate com o investimento executado (PUB-07).** O número oficial
+ *    é o da planilha de fechamento, o mesmo do slide de investimento. A
+ *    diferença entre ele e o total da tabela (R$ 100.657,48 em 19/11/2026,
+ *    saldo de dezembro) entra em Internet — decisão do Núcleo de Mídia. É
+ *    calculada, não digitada: se PUB-07 mudar, as duas lâminas seguem iguais,
+ *    e `npm run conferir` mostra o ajuste aplicado.
  */
+
+/** Meio que absorve a diferença até o investimento executado de PUB-07. */
+export const MEIO_DO_AJUSTE = 'Internet'
 
 export type UnidadeEntrega = 'inserções' | 'impressões' | 'impactos' | 'publicações'
 
@@ -50,21 +59,42 @@ export interface Meio extends MeioDef {
   participacao: number
   /** a entrega veio da planilha de fechamento, não da tabela */
   daPlanilha: boolean
+  /** quanto foi somado ao valor da tabela para fechar com PUB-07 */
+  ajuste: number
 }
 
 export interface DistribuicaoMidia {
   meios: Meio[]
   total: number
+  /** diferença PUB-07 − total da tabela, somada em MEIO_DO_AJUSTE */
+  ajuste: number
 }
 
-/** Monta a distribuição, encaixando as impressões de PUB-02 em Internet. */
-export function montarDistribuicao(impressoesInternet: number | null): DistribuicaoMidia {
-  const total = MEIOS_2025.reduce((s, m) => s + m.investimento, 0)
-  const meios = MEIOS_2025.map((m) => ({
-    ...m,
-    entrega: m.entrega ?? impressoesInternet,
-    daPlanilha: m.entrega == null,
-    participacao: total > 0 ? m.investimento / total : 0,
-  })).sort((a, b) => b.investimento - a.investimento)
-  return { meios, total }
+/**
+ * Monta a distribuição: impressões de PUB-02 em Internet e, quando o
+ * investimento executado de PUB-07 é conhecido, a diferença para ele somada em
+ * MEIO_DO_AJUSTE — o total passa a ser o mesmo do slide de investimento.
+ */
+export function montarDistribuicao(
+  impressoesInternet: number | null,
+  investimentoExecutado: number | null = null,
+): DistribuicaoMidia {
+  const totalTabela = MEIOS_2025.reduce((s, m) => s + m.investimento, 0)
+  const ajuste = investimentoExecutado == null ? 0 : investimentoExecutado - totalTabela
+
+  const comAjuste = MEIOS_2025.map((m) => {
+    const delta = m.meio === MEIO_DO_AJUSTE ? ajuste : 0
+    return { ...m, investimento: m.investimento + delta, ajuste: delta }
+  })
+  const total = comAjuste.reduce((s, m) => s + m.investimento, 0)
+
+  const meios = comAjuste
+    .map((m) => ({
+      ...m,
+      entrega: m.entrega ?? impressoesInternet,
+      daPlanilha: m.entrega == null,
+      participacao: total > 0 ? m.investimento / total : 0,
+    }))
+    .sort((a, b) => b.investimento - a.investimento)
+  return { meios, total, ajuste }
 }

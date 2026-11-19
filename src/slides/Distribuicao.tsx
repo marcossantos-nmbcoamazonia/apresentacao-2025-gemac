@@ -1,4 +1,4 @@
-import { ABA_PUBLICIDADE, type DadosPublicidade } from '../data/publicidade'
+import type { DadosPublicidade } from '../data/publicidade'
 import { montarDistribuicao, type Meio } from '../data/distribuicaoMidia'
 import { formatCompact, formatadorFixo, formatFull, formatPercent } from '../lib/numbers'
 import { Assinatura, Eyebrow, MARGEM, Nota, NumeroHeroi, Palco, TituloDisplay } from './editorial'
@@ -88,9 +88,14 @@ function Linha({ m, maior }: { m: Meio; maior: number }) {
 
 export function Distribuicao({ dados }: { dados: DadosPublicidade | null }) {
   const impressoes = dados?.analise.series.impressoes
-  const dist = montarDistribuicao(impressoes?.temDado ? impressoes.total : null)
+  const midia = dados?.analise.series.midia
+  // o total fecha com o investimento executado (PUB-07), o mesmo do slide de
+  // investimento — a diferença entra em Internet, sem menção no slide
+  const dist = montarDistribuicao(
+    impressoes?.temDado ? impressoes.total : null,
+    midia?.temDado ? midia.total : null,
+  )
   const maior = dist.meios[0]?.investimento ?? 1
-  const executado = dados?.analise.series.midia
 
   const cabecalho = ['Meio', 'Participação no investimento', 'Investimento', '%', 'Entrega']
 
@@ -152,9 +157,6 @@ export function Distribuicao({ dados }: { dados: DadosPublicidade | null }) {
         Internet inclui redes sociais; suas impressões são as da planilha de fechamento (PUB-02),
         as mesmas dos demais slides. TV em inserções, rádio em inserções, DOOH em impactos, jornal e
         revista em publicações — unidades distintas, por isso as entregas não se somam.
-        {executado?.temDado &&
-          Math.abs(executado.total - dist.total) >= 1 &&
-          ` O investimento de mídia executado da aba ${ABA_PUBLICIDADE} soma ${formatFull(executado.total, { moeda: true })}, ${formatCompact(Math.abs(executado.total - dist.total), { moeda: true })} ${executado.total > dist.total ? 'acima' : 'abaixo'} do total por meio.`}
       </Nota>
 
       <Assinatura periodo={dados?.fechado.periodo ?? null} />

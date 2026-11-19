@@ -112,6 +112,13 @@ export interface AnalisePublicidade {
   alcancePartes: { rotulo: string; valor: number; participacao: number }[]
   /** mídia + produção */
   investimentoTotal: number
+  /**
+   * Produção do período. Em 2025 a planilha traz só o total anual (coluna
+   * "Acum. 2025" de PUB-08), sem os meses: aí o valor sai do acumulado e
+   * `producaoMensal` é false — entra na composição do ano, não no gráfico mês a mês.
+   */
+  producaoTotal: number | null
+  producaoMensal: boolean
   /** só as parcelas com dado — produção vazia não aparece como "R$ 0 · 0%" */
   investimentoPartes: { rotulo: string; valor: number; participacao: number }[]
   /** campanhas com meta de lead e a soma delas — numerador do CPL */
@@ -217,13 +224,18 @@ export function analisarPublicidade(
     .map((p) => ({ rotulo: p.rotulo, valor: p.serie.total }))
     .map((p) => ({ ...p, participacao: alcanceTotal > 0 ? p.valor / alcanceTotal : 0 }))
 
-  const investimentoTotal = series.midia.total + series.producao.total
+  // a soma mês a mês vale quando há meses; sem eles, o total anual da planilha
+  const producaoMensal = series.producao.temDado
+  const producaoTotal = producaoMensal
+    ? series.producao.total
+    : parseBR(porId(aba.linhas, 'PUB-08')?.acumAno)
+
+  const investimentoTotal = series.midia.total + (producaoTotal ?? 0)
   const investimentoPartes = [
-    { rotulo: 'Mídia', serie: series.midia },
-    { rotulo: 'Produção', serie: series.producao },
+    { rotulo: 'Mídia', valor: series.midia.temDado ? series.midia.total : null },
+    { rotulo: 'Produção', valor: producaoTotal },
   ]
-    .filter((p) => p.serie.temDado)
-    .map((p) => ({ rotulo: p.rotulo, valor: p.serie.total }))
+    .filter((p): p is { rotulo: string; valor: number } => p.valor != null)
     .map((p) => ({ ...p, participacao: investimentoTotal > 0 ? p.valor / investimentoTotal : 0 }))
 
   const ctrValor =
@@ -285,6 +297,8 @@ export function analisarPublicidade(
     alcancePartes,
     investimentoTotal,
     investimentoPartes,
+    producaoTotal,
+    producaoMensal,
     campanhasLead: CAMPANHAS_LEAD,
     investimentoLead: INVESTIMENTO_LEAD,
     // só faz sentido avisar quando há leads entrando na conta

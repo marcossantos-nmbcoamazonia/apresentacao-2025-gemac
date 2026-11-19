@@ -179,23 +179,28 @@ if (a.leadDesatualizado) {
 }
 
 // --------------------------- distribuição de mídia --------------------------
-const dist = montarDistribuicao(a.series.impressoes.temDado ? a.series.impressoes.total : null)
+const imp = a.series.impressoes.temDado ? a.series.impressoes.total : null
+const tabela = montarDistribuicao(imp) // sem ajuste: os valores como vieram
+const dist = montarDistribuicao(imp, a.series.midia.temDado ? a.series.midia.total : null)
 console.log(`\n\nDISTRIBUIÇÃO DE MÍDIA POR MEIO   (valores transcritos em src/data/distribuicaoMidia.ts)`)
 console.log(REGUA)
 for (const m of dist.meios) {
   console.log(
     `  ${m.meio.padEnd(16)}${('R$ ' + br(m.investimento, 2)).padStart(18)}  ${br(m.participacao * 100, 1).padStart(5)}%` +
-      `${(m.entrega == null ? '—' : br(m.entrega)).padStart(16)} ${m.unidade}${m.daPlanilha ? '  (PUB-02)' : ''}`,
+      `${(m.entrega == null ? '—' : br(m.entrega)).padStart(16)} ${m.unidade}` +
+      `${m.daPlanilha ? '  (PUB-02)' : ''}${m.ajuste ? `  (inclui ajuste de R$ ${br(m.ajuste, 2)})` : ''}`,
   )
 }
 console.log(`  ${'TOTAL'.padEnd(16)}${('R$ ' + br(dist.total, 2)).padStart(18)}`)
 console.log(
-  Math.abs(dist.total - TOTAL_TABELA) < 0.01
-    ? `  Soma dos meios = "Total geral" da tabela (R$ ${br(TOTAL_TABELA, 2)}).`
-    : `  ATENÇÃO: soma dos meios difere do "Total geral" da tabela (R$ ${br(TOTAL_TABELA, 2)}).`,
+  Math.abs(tabela.total - TOTAL_TABELA) < 0.01
+    ? `  Soma da tabela-fonte = "Total geral" (R$ ${br(TOTAL_TABELA, 2)}).`
+    : `  ATENÇÃO: soma da tabela-fonte difere do "Total geral" (R$ ${br(TOTAL_TABELA, 2)}).`,
 )
 console.log(
-  `  Investimento executado (PUB-07): R$ ${br(a.series.midia.total, 2)} — diferença de R$ ${br(a.series.midia.total - dist.total, 2)}.`,
+  `  Total por meio = investimento executado PUB-07 (R$ ${br(a.series.midia.total, 2)}): ` +
+    `${Math.abs(dist.total - a.series.midia.total) < 0.01 ? 'bate' : 'NÃO BATE'}. ` +
+    `Ajuste em Internet: R$ ${br(dist.ajuste, 2)}.`,
 )
 
 // ------------------------- marketing de influência --------------------------

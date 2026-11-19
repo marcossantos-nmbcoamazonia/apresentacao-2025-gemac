@@ -88,6 +88,14 @@ entram em Internet, e a entrega de Internet são as impressões de PUB-02 da
 planilha de fechamento. Cada meio tem sua unidade (inserções, impressões,
 impactos, publicações), por isso as entregas não são somadas.
 
+O total por meio fecha com o investimento executado (PUB-07), o mesmo da
+lâmina de investimento: a diferença para o total da tabela (R$ 100.657,48 em
+19/11/2026) é somada em Internet, calculada a partir da planilha.
+
+**Produção (PUB-08)** só tem o total anual em 2025 (R$ 11.659.806,88, coluna
+`Acum. 2025`), sem meses. A lâmina de investimento mostra a composição do ano
+(mídia + produção = R$ 44,7 Mi) e o gráfico mês a mês fica só com a mídia.
+
 ## Marketing de influência (lâmina 12)
 
 Vem de outra planilha (`16qaRdOT…`, aba `base`, constante `PLANILHA_INFLUENCIA`

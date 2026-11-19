@@ -130,7 +130,15 @@ export function montarKpi(
     soma += v
     quantos++
   }
-  const valor = quantos === 0 ? null : agregacao === 'media' ? soma / quantos : soma
+  let valor = quantos === 0 ? null : agregacao === 'media' ? soma / quantos : soma
+
+  // Linha só com total anual e nenhum mês (PUB-08 em 2025): o acumulado da
+  // planilha é o único dado que existe. "0" não conta — é a fórmula da
+  // planilha somando células vazias, e zero aqui leria como "nada gasto".
+  if (valor == null && agregacao === 'soma') {
+    const acum = parseBR(linha.acumAno)
+    if (acum != null && acum !== 0) valor = acum
+  }
 
   // variação mês a mês, pulando buracos na série (PUB-04 não tem Fev/Mar)
   const iUltimo = ultimoMesDoIndicador(linha, fechado.indice)
