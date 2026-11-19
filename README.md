@@ -79,7 +79,16 @@ custo inflado, porque a maior parte da verba não tem meta de lead.
 **A variação é mês contra mês**, sempre rotulada com os meses comparados
 (`Ago vs. Jul`), para não ser lida como variação do acumulado.
 
-## Marketing de influência (lâmina 11)
+## Distribuição de mídia (lâmina 4)
+
+Investimento e entrega por meio em 2025. Os valores vêm da tabela de
+veiculação por meio enviada pelo Núcleo de Mídia e estão transcritos em
+`src/data/distribuicaoMidia.ts` (ainda não há rota da API). Redes sociais
+entram em Internet, e a entrega de Internet são as impressões de PUB-02 da
+planilha de fechamento. Cada meio tem sua unidade (inserções, impressões,
+impactos, publicações), por isso as entregas não são somadas.
+
+## Marketing de influência (lâmina 12)
 
 Vem de outra planilha (`16qaRdOT…`, aba `base`, constante `PLANILHA_INFLUENCIA`
 em `src/data/influencia.ts`): o quadro "Big Numbers" da estratégia Always On,
@@ -102,6 +111,7 @@ src/
   api/client.ts          fetch + cache de sessão (5 min) com fallback para cache vencido
   api/parseSheet.ts      parser genérico das abas de área — serve as 7 abas
   data/publicidade.ts    regra de negócio da seção (funções puras) + nome da aba
+  data/distribuicaoMidia.ts  investimento e entrega por meio (valores transcritos)
   data/influencia.ts     parser do consolidado de influência (formatos 2025 e 2026)
   data/campanhasLead.ts  campanhas de lead (base do CPL) — falta preencher 2025
   data/usePublicidade.ts casca React sobre a anterior

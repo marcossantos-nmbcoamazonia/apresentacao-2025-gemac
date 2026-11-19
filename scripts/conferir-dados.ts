@@ -11,6 +11,7 @@
  */
 import { parseAba, porId } from '../src/api/parseSheet'
 import { parseBR } from '../src/lib/numbers'
+import { montarDistribuicao, TOTAL_TABELA } from '../src/data/distribuicaoMidia'
 import {
   ABA_INFLUENCIA,
   PLANILHA_INFLUENCIA,
@@ -176,6 +177,26 @@ if (a.leadDesatualizado) {
       `  Confira os PIs do período e atualize src/data/campanhasLead.ts (inclusive CONFERIDO_ATE).`,
   )
 }
+
+// --------------------------- distribuição de mídia --------------------------
+const dist = montarDistribuicao(a.series.impressoes.temDado ? a.series.impressoes.total : null)
+console.log(`\n\nDISTRIBUIÇÃO DE MÍDIA POR MEIO   (valores transcritos em src/data/distribuicaoMidia.ts)`)
+console.log(REGUA)
+for (const m of dist.meios) {
+  console.log(
+    `  ${m.meio.padEnd(16)}${('R$ ' + br(m.investimento, 2)).padStart(18)}  ${br(m.participacao * 100, 1).padStart(5)}%` +
+      `${(m.entrega == null ? '—' : br(m.entrega)).padStart(16)} ${m.unidade}${m.daPlanilha ? '  (PUB-02)' : ''}`,
+  )
+}
+console.log(`  ${'TOTAL'.padEnd(16)}${('R$ ' + br(dist.total, 2)).padStart(18)}`)
+console.log(
+  Math.abs(dist.total - TOTAL_TABELA) < 0.01
+    ? `  Soma dos meios = "Total geral" da tabela (R$ ${br(TOTAL_TABELA, 2)}).`
+    : `  ATENÇÃO: soma dos meios difere do "Total geral" da tabela (R$ ${br(TOTAL_TABELA, 2)}).`,
+)
+console.log(
+  `  Investimento executado (PUB-07): R$ ${br(a.series.midia.total, 2)} — diferença de R$ ${br(a.series.midia.total - dist.total, 2)}.`,
+)
 
 // ------------------------- marketing de influência --------------------------
 const rInf = await fetch(

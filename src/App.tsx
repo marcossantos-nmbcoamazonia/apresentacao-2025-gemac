@@ -8,6 +8,7 @@ import { ContextoErro } from './slides/editorial'
 import { Capa } from './slides/Capa'
 import { Tese } from './slides/Tese'
 import { Numeros } from './slides/Numeros'
+import { Distribuicao } from './slides/Distribuicao'
 import { Alcance } from './slides/Alcance'
 import { Evolucao } from './slides/Evolucao'
 import { Eficiencia } from './slides/Eficiencia'
@@ -58,6 +59,12 @@ export default function App() {
         titulo: 'Os números do período',
         fonte,
         render: () => <Numeros dados={dados} carregando={carregando} />,
+      },
+      {
+        id: 'distribuicao',
+        titulo: 'Distribuição de mídia',
+        fonte,
+        render: () => <Distribuicao dados={dados} />,
       },
       { id: 'alcance', titulo: 'Alcance', fonte, render: () => <Alcance dados={dados} /> },
       {
