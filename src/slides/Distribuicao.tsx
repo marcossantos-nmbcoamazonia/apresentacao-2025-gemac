@@ -91,8 +91,13 @@ export function Distribuicao({ dados }: { dados: DadosPublicidade | null }) {
   const midia = dados?.analise.series.midia
   // o total fecha com o investimento executado (PUB-07), o mesmo do slide de
   // investimento — a diferença entra em Internet, sem menção no slide
+  const ooh = dados?.analise.series.ooh
+  // entregas de Internet e DOOH são as da planilha, as mesmas do slide 3
   const dist = montarDistribuicao(
-    impressoes?.temDado ? impressoes.total : null,
+    {
+      'PUB-02': impressoes?.temDado ? impressoes.total : null,
+      'PUB-04': ooh?.temDado ? ooh.total : null,
+    },
     midia?.temDado ? midia.total : null,
   )
   const maior = dist.meios[0]?.investimento ?? 1
@@ -154,9 +159,9 @@ export function Distribuicao({ dados }: { dados: DadosPublicidade | null }) {
       </div>
 
       <Nota style={{ position: 'absolute', left: MARGEM, right: MARGEM, bottom: 66 }}>
-        Internet inclui redes sociais; suas impressões são as da planilha de fechamento (PUB-02),
-        as mesmas dos demais slides. TV em inserções, rádio em inserções, DOOH em impactos, jornal e
-        revista em publicações — unidades distintas, por isso as entregas não se somam.
+        Internet inclui redes sociais. Impressões de internet (PUB-02) e impactos de DOOH (PUB-04)
+        são os da planilha de fechamento, os mesmos dos demais slides. TV e rádio em inserções,
+        jornal e revista em publicações — unidades distintas, por isso as entregas não se somam.
       </Nota>
 
       <Assinatura periodo={dados?.fechado.periodo ?? null} />

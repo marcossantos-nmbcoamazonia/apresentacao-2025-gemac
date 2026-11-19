@@ -179,16 +179,19 @@ if (a.leadDesatualizado) {
 }
 
 // --------------------------- distribuição de mídia --------------------------
-const imp = a.series.impressoes.temDado ? a.series.impressoes.total : null
-const tabela = montarDistribuicao(imp) // sem ajuste: os valores como vieram
-const dist = montarDistribuicao(imp, a.series.midia.temDado ? a.series.midia.total : null)
+const entregasPlanilha = {
+  'PUB-02': a.series.impressoes.temDado ? a.series.impressoes.total : null,
+  'PUB-04': a.series.ooh.temDado ? a.series.ooh.total : null,
+}
+const tabela = montarDistribuicao(entregasPlanilha) // sem ajuste: os valores como vieram
+const dist = montarDistribuicao(entregasPlanilha, a.series.midia.temDado ? a.series.midia.total : null)
 console.log(`\n\nDISTRIBUIÇÃO DE MÍDIA POR MEIO   (valores transcritos em src/data/distribuicaoMidia.ts)`)
 console.log(REGUA)
 for (const m of dist.meios) {
   console.log(
     `  ${m.meio.padEnd(16)}${('R$ ' + br(m.investimento, 2)).padStart(18)}  ${br(m.participacao * 100, 1).padStart(5)}%` +
       `${(m.entrega == null ? '—' : br(m.entrega)).padStart(16)} ${m.unidade}` +
-      `${m.daPlanilha ? '  (PUB-02)' : ''}${m.ajuste ? `  (inclui ajuste de R$ ${br(m.ajuste, 2)})` : ''}`,
+      `${m.daPlanilha ? `  (${m.daPlanilha})` : ''}${m.ajuste ? `  (inclui ajuste de R$ ${br(m.ajuste, 2)})` : ''}`,
   )
 }
 console.log(`  ${'TOTAL'.padEnd(16)}${('R$ ' + br(dist.total, 2)).padStart(18)}`)
